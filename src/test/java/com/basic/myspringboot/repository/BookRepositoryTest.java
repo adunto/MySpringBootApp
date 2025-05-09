@@ -11,6 +11,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,10 +67,12 @@ class BookRepositoryTest {
 
     @Test
     void testFindByAuthor() {
-        Book book = bookRepository.findByAuthor("홍길동")
-                .orElseThrow(() -> new RuntimeException("Book Not Found"));
+        List<Book> books = bookRepository.findByAuthor("홍길동");
+        if (books.isEmpty()) {
+            throw new RuntimeException("Book Not Found.");
+        }
 
-        assertThat(book.getAuthor()).isEqualTo("홍길동");
+        assertThat(books.get(0).getAuthor()).isEqualTo("홍길동");
     }
 
     @Test
