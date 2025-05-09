@@ -1,8 +1,7 @@
 package com.basic.myspringboot.controller.dto;
 
-import com.rookies3.myspringbootlab.entity.Book;
+import com.basic.myspringboot.entity.Book;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,7 +30,8 @@ public class BookDTO {
         private Integer price;
         
         private LocalDate publishDate;
-        
+
+        // BookCreateRequest => Entity
         public Book toEntity() {
             Book book = new Book();
             book.setTitle(this.title);
