@@ -54,6 +54,7 @@ public class BookDTO {
         // 확장 가능성을 위해 추가 필드들을 옵셔널하게 포함할 수 있음
         private String title;
         private String author;
+        private String isbn;
         private LocalDate publishDate;
     }
     
