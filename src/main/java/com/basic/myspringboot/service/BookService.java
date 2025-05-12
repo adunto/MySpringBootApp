@@ -2,7 +2,9 @@ package com.basic.myspringboot.service;
 
 import com.basic.myspringboot.controller.dto.BookDTO;
 import com.basic.myspringboot.entity.Book;
+import com.basic.myspringboot.entity.BookDetail;
 import com.basic.myspringboot.exception.BusinessException;
+import com.basic.myspringboot.repository.BookDetailRepository;
 import com.basic.myspringboot.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,32 +19,39 @@ import java.util.List;
 public class BookService {
     private final BookRepository bookRepository;
 
-    public List<BookDTO.BookResponse> getAllBooks() {
+    private final BookDetailRepository bookDetailRepository;
+
+    public List<BookDTO.Response> getAllBooks() {
         return bookRepository.findAll().stream()
-                .map(BookDTO.BookResponse::from).toList();
+                .map(BookDTO.Response::fromEntity).toList();
     }
 
-    public BookDTO.BookResponse getBookById(Long id) {
+    public BookDTO.Response getBookById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
                         new BusinessException("Book Not Found", HttpStatus.NOT_FOUND));
-        return BookDTO.BookResponse.from(book);
+        return BookDTO.Response.fromEntity(book);
     }
 
-    public BookDTO.BookResponse getBookByIsbn(String isbn) {
+    public BookDTO.Response getBookByIsbn(String isbn) {
         Book book = bookRepository.findByIsbn(isbn)
                 .orElseThrow(() ->
                         new BusinessException("Book Not Found", HttpStatus.NOT_FOUND));
-        return BookDTO.BookResponse.from(book);
+        return BookDTO.Response.fromEntity(book);
     }
 
-    public List<BookDTO.BookResponse> getBooksByAuthor(String author) {
-        return bookRepository.findByAuthor(author)
-                .stream().map(BookDTO.BookResponse::from).toList();
+    public List<BookDTO.Response> getBooksByAuthor(String author) {
+        return bookRepository.findByAuthorContainingIgnoreCase(author)
+                .stream().map(BookDTO.Response::fromEntity).toList();
+    }
+
+    public List<BookDTO.Response> getBooksByTitle(String title) {
+        return bookRepository.findByTitleContainingIgnoreCase(title)
+                .stream().map(BookDTO.Response::fromEntity).toList();
     }
 
     @Transactional
-    public BookDTO.BookResponse createBook(BookDTO.BookCreateRequest request) {
+    public BookDTO.Response createBook(BookDTO.Request request) {
         // isbn 중복 검사
         bookRepository.findByIsbn(request.getIsbn())
                 .ifPresent(
@@ -52,14 +61,33 @@ public class BookService {
                         }
                 );
 
-        Book book = request.toEntity();
+        Book book = Book.builder().title(request.getTitle())
+                .author(request.getAuthor())
+                .isbn(request.getIsbn())
+                .price(request.getPrice())
+                .publishDate(request.getPublishDate()).build();
+
+        BookDTO.BookDetailDTO d = request.getDetailRequest();
+
+
+        BookDetail bookDetail = BookDetail.builder()
+                .description(d.getDescription())
+                .language(d.getLanguage())
+                .pageCount(d.getPageCount())
+                .publisher(d.getPublisher())
+                .coverImageUrl(d.getCoverImageUrl())
+                .edition(d.getEdition()).build();
+
+        book.setBookDetail(bookDetail);
+        bookDetail.setBook(book);
+
         Book savedBook = bookRepository.save(book);
-        return BookDTO.BookResponse.from(savedBook);
+        return BookDTO.Response.fromEntity(savedBook);
     }
 
     @Transactional
-    public BookDTO.BookResponse updateBook(Long id,
-                                           BookDTO.BookUpdateRequest request) {
+    public BookDTO.Response updateBook(Long id,
+                                           BookDTO.Request request) {
 
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
@@ -69,7 +97,7 @@ public class BookService {
         book.setIsbn(request.getIsbn());
         book.setPrice(request.getPrice());
         Book updatedBook = bookRepository.save(book);
-        return BookDTO.BookResponse.from(updatedBook);
+        return BookDTO.Response.fromEntity(updatedBook);
     }
 
     @Transactional
