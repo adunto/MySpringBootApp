@@ -4,10 +4,9 @@ import com.basic.myspringboot.entity.User;
 import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +20,19 @@ public class UserRestController {
 //    @Autowired
     private final UserRepository userRepository;
 
+    @GetMapping("/welcome")
+    public String welcome() {
+        return "Welcome this endpoint is not secure";
+    }
+
+
     @PostMapping
     public User create(@RequestBody User user) {
         return userRepository.save(user);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
 
@@ -35,6 +41,7 @@ public class UserRestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<User> getUsers() {
         return userRepository.findAll();
     }
@@ -66,4 +73,6 @@ public class UserRestController {
         //return ResponseEntity.ok(user);
         return ResponseEntity.ok("User 삭제됨.");
     }
+
+
 }
