@@ -4,6 +4,7 @@ import com.basic.myspringboot.controller.dto.BookDTO;
 import com.basic.myspringboot.entity.Book;
 import com.basic.myspringboot.entity.BookDetail;
 import com.basic.myspringboot.exception.BusinessException;
+import com.basic.myspringboot.exception.ErrorCode;
 import com.basic.myspringboot.repository.BookDetailRepository;
 import com.basic.myspringboot.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,37 +30,41 @@ public class BookService {
     public BookDTO.Response getBookById(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
-                        new BusinessException("Book Not Found", HttpStatus.NOT_FOUND));
+                        new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book", "id", id));
         return BookDTO.Response.fromEntity(book);
     }
 
     public BookDTO.Response getBookByIsbn(String isbn) {
         Book book = bookRepository.findByIsbn(isbn)
                 .orElseThrow(() ->
-                        new BusinessException("Book Not Found", HttpStatus.NOT_FOUND));
+                        new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book", "isbn", isbn));
         return BookDTO.Response.fromEntity(book);
     }
 
     public List<BookDTO.Response> getBooksByAuthor(String author) {
-        return bookRepository.findByAuthorContainingIgnoreCase(author)
+        List<BookDTO.Response> list = bookRepository.findByAuthorContainingIgnoreCase(author)
                 .stream().map(BookDTO.Response::fromEntity).toList();
+        if (list.isEmpty()) {
+            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book", "author", author);
+        }
+        return list;
     }
 
     public List<BookDTO.Response> getBooksByTitle(String title) {
-        return bookRepository.findByTitleContainingIgnoreCase(title)
+        List<BookDTO.Response> list = bookRepository.findByTitleContainingIgnoreCase(title)
                 .stream().map(BookDTO.Response::fromEntity).toList();
+        if (list.isEmpty()) {
+            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book", "title", title);
+        }
+        return list;
     }
 
     @Transactional
     public BookDTO.Response createBook(BookDTO.Request request) {
         // isbn 중복 검사
-        bookRepository.findByIsbn(request.getIsbn())
-                .ifPresent(
-                        user -> {
-                            throw new BusinessException("해당 도서의 isbn이 이미 존재합니다. : " + request.getIsbn(),
-                                    HttpStatus.CONFLICT);
-                        }
-                );
+        if (bookRepository.existsByIsbn(request.getIsbn())) {
+            throw new BusinessException(ErrorCode.ISBN_DUPLICATE, request.getIsbn());
+        }
 
         Book book = Book.builder().title(request.getTitle())
                 .author(request.getAuthor())
@@ -68,7 +73,6 @@ public class BookService {
                 .publishDate(request.getPublishDate()).build();
 
         BookDTO.BookDetailDTO d = request.getDetailRequest();
-
 
         BookDetail bookDetail = BookDetail.builder()
                 .description(d.getDescription())
@@ -91,7 +95,7 @@ public class BookService {
 
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
-                        new BusinessException("Book Not Found", HttpStatus.NOT_FOUND));
+                        new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book", "id", id));
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
         book.setIsbn(request.getIsbn());
@@ -105,7 +109,7 @@ public class BookService {
         bookRepository.delete(
                 bookRepository.findById(id)
                         .orElseThrow(() ->
-                                new BusinessException("Book Not Found", HttpStatus.NOT_FOUND))
+                                new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Book", "id", id))
         );
     }
 
