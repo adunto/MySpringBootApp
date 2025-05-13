@@ -5,6 +5,7 @@ import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+//@Controller + @ResponseBody
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
+@Profile("test")
 public class UserRestController {
     // UserRepository 가져오기 (의존성)
 //    @Autowired
