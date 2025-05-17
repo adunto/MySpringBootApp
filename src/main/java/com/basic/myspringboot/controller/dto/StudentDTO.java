@@ -4,10 +4,7 @@ import com.basic.myspringboot.entity.Student;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -75,6 +72,24 @@ public class StudentDTO {
                     .name(student.getName())
                     .studentNumber(student.getStudentNumber())
                     .detail(detailResponse)
+                    .build();
+        }
+    }
+
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SimpleResponse {
+        private Long id;
+        private String name;
+        private String studentNumber;
+
+        public static SimpleResponse fromEntity(Student student) {
+            return SimpleResponse.builder()
+                    .id(student.getId())
+                    .name(student.getName())
+                    .studentNumber(student.getStudentNumber())
                     .build();
         }
     }

@@ -5,6 +5,7 @@ import com.basic.myspringboot.entity.Student;
 import com.basic.myspringboot.entity.StudentDetail;
 import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.exception.ErrorCode;
+import com.basic.myspringboot.repository.DepartmentRepository;
 import com.basic.myspringboot.repository.StudentDetailRepository;
 import com.basic.myspringboot.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
     private final StudentDetailRepository studentDetailRepository;
+    private final DepartmentRepository departmentRepository;
 
     public List<StudentDTO.Response> getAllStudents() {
         return studentRepository.findAll()
@@ -41,6 +43,16 @@ public class StudentService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         "Student", "student number", studentNumber));
         return StudentDTO.Response.fromEntity(student);
+    }
+
+    public List<StudentDTO.Response> getStudentsByDepartmentId(Long departmentId) {
+        if (!departmentRepository.existsById(departmentId)) {
+            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
+                    "Department", "id", departmentId);
+        }
+
+        return studentRepository.findByDepartmentId(departmentId).stream()
+                .map(StudentDTO.Response::fromEntity).toList();
     }
 
     @Transactional

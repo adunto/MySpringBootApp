@@ -28,4 +28,8 @@ public class Student {
     // Student와 StudentDetail 의 라이프사이클이 동일하다. (cascade = CascadeType.ALL)
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = CascadeType.ALL)
     private StudentDetail studentDetail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 }
