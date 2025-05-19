@@ -2,6 +2,7 @@ package com.basic.myspringboot.controller.dto;
 
 import com.basic.myspringboot.entity.Book;
 import com.basic.myspringboot.entity.BookDetail;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -80,7 +81,7 @@ public class BookDTO {
         }
     }
 
-    @Data
+    @Getter @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -103,11 +104,12 @@ public class BookDTO {
         private LocalDate publishDate;
 
         @Valid
+        @JsonProperty("detail")
         private BookDetailDTO detailRequest;
 
     }
 
-    @Data
+    @Getter @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -118,6 +120,16 @@ public class BookDTO {
         private String publisher;
         private String coverImageUrl;
         private String edition;
+
+        public BookDetail toBookDetail() {
+            return BookDetail.builder()
+                    .description(description)
+                    .language(language)
+                    .pageCount(pageCount)
+                    .publisher(publisher)
+                    .coverImageUrl(coverImageUrl)
+                    .edition(edition).build();
+        }
     }
 
     @Data

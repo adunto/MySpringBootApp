@@ -7,6 +7,7 @@ import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.exception.ErrorCode;
 import com.basic.myspringboot.repository.BookDetailRepository;
 import com.basic.myspringboot.repository.BookRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -92,7 +93,7 @@ public class BookService {
 
     @Transactional
     public BookDTO.Response updateBook(Long id,
-                                           BookDTO.Request request) {
+                                         BookDTO.Request request) {
 
         Book book = bookRepository.findById(id)
                 .orElseThrow(() ->
@@ -101,6 +102,8 @@ public class BookService {
         book.setAuthor(request.getAuthor());
         book.setIsbn(request.getIsbn());
         book.setPrice(request.getPrice());
+        book.setBookDetail(request.getDetailRequest().toBookDetail());
+
         Book updatedBook = bookRepository.save(book);
         return BookDTO.Response.fromEntity(updatedBook);
     }
