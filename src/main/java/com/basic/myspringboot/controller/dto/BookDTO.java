@@ -2,12 +2,14 @@ package com.basic.myspringboot.controller.dto;
 
 import com.basic.myspringboot.entity.Book;
 import com.basic.myspringboot.entity.BookDetail;
+import com.basic.myspringboot.entity.Publisher;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class BookDTO {
 
@@ -107,6 +109,8 @@ public class BookDTO {
         @JsonProperty("detail")
         private BookDetailDTO detailRequest;
 
+        @Valid
+        private PublisherDTO.Request publisher;
     }
 
     @Getter @Setter
@@ -117,7 +121,6 @@ public class BookDTO {
         private String description;
         private String language;
         private Integer pageCount;
-        private String publisher;
         private String coverImageUrl;
         private String edition;
 
@@ -126,7 +129,6 @@ public class BookDTO {
                     .description(description)
                     .language(language)
                     .pageCount(pageCount)
-                    .publisher(publisher)
                     .coverImageUrl(coverImageUrl)
                     .edition(edition).build();
         }
@@ -144,6 +146,7 @@ public class BookDTO {
         private Integer price;
         private LocalDate publishDate;
         private BookDetailResponse detail;
+        private PublisherDTO.Response publisher;
 
         public static Response fromEntity(Book book) {
             BookDetailResponse detailResponse = book.getBookDetail() != null
@@ -152,10 +155,13 @@ public class BookDTO {
                     .description(book.getBookDetail().getDescription())
                     .language(book.getBookDetail().getLanguage())
                     .pageCount(book.getBookDetail().getPageCount())
-                    .publisher(book.getBookDetail().getPublisher())
                     .coverImageUrl(book.getBookDetail().getCoverImageUrl())
                     .edition(book.getBookDetail().getEdition())
                     .build()
+                    : null;
+
+            PublisherDTO.Response publisherResponseDTO = book.getPublisher() != null
+                    ? PublisherDTO.Response.fromEntity(book.getPublisher())
                     : null;
 
             return Response.builder()
@@ -166,6 +172,7 @@ public class BookDTO {
                     .price(book.getPrice())
                     .publishDate(book.getPublishDate())
                     .detail(detailResponse)
+                    .publisher(publisherResponseDTO)
                     .build();
         }
     }
@@ -179,8 +186,97 @@ public class BookDTO {
         private String description;
         private String language;
         private Integer pageCount;
-        private String publisher;
         private String coverImageUrl;
         private String edition;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SimpleResponse {
+        private Long id;
+        private String title;
+        private String author;
+        private String isbn;
+
+        public static SimpleResponse fromEntity(Book book) {
+            return SimpleResponse.builder()
+                    .id(book.getId())
+                    .title(book.getTitle())
+                    .author(book.getAuthor())
+                    .isbn(book.getIsbn())
+                    .build();
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BookAndDetailResponse {
+        private Long id;
+        private String title;
+        private String author;
+        private String isbn;
+        private Integer price;
+        private LocalDate publishDate;
+        private BookDetailResponse detail;
+
+        public static BookAndDetailResponse fromEntity(Book book) {
+            BookDetailResponse detailResponse = book.getBookDetail() != null
+                    ? BookDetailResponse.builder()
+                    .id(book.getBookDetail().getId())
+                    .description(book.getBookDetail().getDescription())
+                    .language(book.getBookDetail().getLanguage())
+                    .pageCount(book.getBookDetail().getPageCount())
+                    .coverImageUrl(book.getBookDetail().getCoverImageUrl())
+                    .edition(book.getBookDetail().getEdition())
+                    .build()
+                    : null;
+
+            return BookAndDetailResponse.builder()
+                    .id(book.getId())
+                    .title(book.getTitle())
+                    .author(book.getAuthor())
+                    .isbn(book.getIsbn())
+                    .price(book.getPrice())
+                    .publishDate(book.getPublishDate())
+                    .detail(detailResponse)
+                    .build();
+        }
+    }
+
+
+    @Data // 또는 @Getter, @Setter 등
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PublisherResponseDTO {
+        private Long id;
+        private String name;
+        private LocalDate establishedDate;
+        private String address;
+
+        public static PublisherResponseDTO fromEntity(Publisher publisher) {
+            if (publisher == null) return null;
+            return PublisherResponseDTO.builder()
+                    .id(publisher.getId())
+                    .name(publisher.getName())
+                    .establishedDate(publisher.getEstablishedDate())
+                    .address(publisher.getAddress())
+                    .build();
+        }
+    }
+
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PublisherRequestDTO {
+        @NotBlank(message = "Publisher name is required")
+        private String name;
+        private LocalDate establishedDate; // 필요하다면 유효성 검증 추가
+        private String address;         // 필요하다면 유효성 검증 추가
     }
 }

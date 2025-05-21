@@ -25,9 +25,6 @@ public class BookDetail {
     private Integer pageCount;
 
     @Column(nullable = false)
-    private String publisher;
-
-    @Column(nullable = false)
     private String coverImageUrl;
 
     @Column(nullable = false)
