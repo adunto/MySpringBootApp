@@ -26,7 +26,6 @@ import java.util.List;
 public class BookService {
     private final BookRepository bookRepository;
 
-    private final BookDetailRepository bookDetailRepository;
     private final PublisherRepository publisherRepository;
 
     public List<BookDTO.Response> getAllBooks() {
@@ -109,18 +108,9 @@ public class BookService {
             bookDetail.setBook(book);
         }
 
-        if (request.getPublisher() != null && request.getPublisher().getName() != null && !request.getPublisher().getName().isEmpty()) {
-            PublisherDTO.Request publisherRequestDto = request.getPublisher();
-
-            Publisher publisher = publisherRepository.findByName(publisherRequestDto.getName())
-                    .orElseGet(() -> {
-                        Publisher newPublisher = Publisher.builder()
-                                .name(publisherRequestDto.getName())
-                                .establishedDate(publisherRequestDto.getEstablishedDate())
-                                .address(publisherRequestDto.getAddress())
-                                .build();
-                        return publisherRepository.save(newPublisher);
-                    });
+        if (publisherRepository.findById(request.getPublisherId()).isPresent()) {
+            Publisher publisher = publisherRepository.findById(request.getPublisherId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Publisher", request.getPublisherId()));
 
             book.setPublisher(publisher); // Book에 Publisher 설정
             publisher.addBook(book);
@@ -156,23 +146,19 @@ public class BookService {
         bookDetail.setCoverImageUrl(detailDto.getCoverImageUrl());
         bookDetail.setEdition(detailDto.getEdition());
 
-        PublisherDTO.Request publisherRequestDto = request.getPublisher();
+        Publisher publisher = publisherRepository.findById(request.getPublisherId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Publisher", request.getPublisherId()));
+
         Publisher currentPublisher = book.getPublisher();
 
-        if (publisherRequestDto != null && publisherRequestDto.getName() != null && !publisherRequestDto.getName().isEmpty()) {
-            // DTO에 Publisher 정보가 있는 경우
-            if (currentPublisher != null && !currentPublisher.getName().equals(publisherRequestDto.getName())) {
-                // 기존 Publisher와 DTO의 Publisher 이름이 다르면, 기존 관계 해제 고려
-                // currentPublisher.removeBook(book); // Publisher의 편의 메서드 사용 (양방향 관계 관리)
-                // book.setPublisher(null); // 일단 null로 설정 후 아래에서 새 Publisher로 연결
-            }
+        if (publisherRepository.findById(request.getPublisherId()).isPresent()) {
 
-            Publisher publisherToSet = publisherRepository.findByName(publisherRequestDto.getName())
+            Publisher publisherToSet = publisherRepository.findByName(publisher.getName())
                     .orElseGet(() -> {
                         Publisher newPublisher = Publisher.builder()
-                                .name(publisherRequestDto.getName())
-                                .establishedDate(publisherRequestDto.getEstablishedDate())
-                                .address(publisherRequestDto.getAddress())
+                                .name(publisher.getName())
+                                .establishedDate(publisher.getEstablishedDate())
+                                .address(publisher.getAddress())
                                 .build();
                         return publisherRepository.save(newPublisher);
                     });

@@ -109,8 +109,11 @@ public class BookDTO {
         @JsonProperty("detail")
         private BookDetailDTO detailRequest;
 
-        @Valid
-        private PublisherDTO.Request publisher;
+//        @Valid
+//        @JsonProperty("publisher")
+//        private PublisherDTO.Request publisher;
+
+        private Long publisherId;
     }
 
     @Getter @Setter
@@ -146,7 +149,7 @@ public class BookDTO {
         private Integer price;
         private LocalDate publishDate;
         private BookDetailResponse detail;
-        private PublisherDTO.Response publisher;
+        private PublisherDTO.SimpleResponse publisher;
 
         public static Response fromEntity(Book book) {
             BookDetailResponse detailResponse = book.getBookDetail() != null
@@ -160,8 +163,8 @@ public class BookDTO {
                     .build()
                     : null;
 
-            PublisherDTO.Response publisherResponseDTO = book.getPublisher() != null
-                    ? PublisherDTO.Response.fromEntity(book.getPublisher())
+            PublisherDTO.SimpleResponse publisherResponseDTO = book.getPublisher() != null
+                    ? PublisherDTO.SimpleResponse.fromEntity(book.getPublisher())
                     : null;
 
             return Response.builder()

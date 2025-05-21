@@ -64,7 +64,6 @@ public class PublisherDTO {
         private String name;
         private LocalDate establishedDate;
         private String address;
-        private Long bookCount;
 
         public static SimpleResponse fromEntity(Publisher publisher) {
             return SimpleResponse.builder()
@@ -75,14 +74,14 @@ public class PublisherDTO {
                     .build();
         }
 
-        public static SimpleResponse fromEntityWithCount(Publisher publisher, Long bookCount) {
-            return SimpleResponse.builder()
-                    .id(publisher.getId())
-                    .name(publisher.getName())
-                    .establishedDate(publisher.getEstablishedDate())
-                    .address(publisher.getAddress())
-                    .bookCount(bookCount)
-                    .build();
-        }
+//        public static SimpleResponse fromEntityWithCount(Publisher publisher, Long bookCount) {
+//            return SimpleResponse.builder()
+//                    .id(publisher.getId())
+//                    .name(publisher.getName())
+//                    .establishedDate(publisher.getEstablishedDate())
+//                    .address(publisher.getAddress())
+//                    .bookCount(bookCount)
+//                    .build();
+//        }
     }
 }
